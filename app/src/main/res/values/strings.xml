@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">InjamSample</string>
+    <string name="physical_id">Physical Id</string>
+    <string name="next">Next</string>
+</resources>
