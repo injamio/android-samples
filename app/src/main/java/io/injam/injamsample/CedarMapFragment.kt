@@ -172,6 +172,7 @@ class CedarMapFragment: Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         map.takeIf { it != null }?.onDestroy()
+        injam.disconnect()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

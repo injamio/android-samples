@@ -135,6 +135,11 @@ class GoogleMapFragment: Fragment(), OnMapReadyCallback {
 
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        injam.disconnect()
+    }
+
     private fun trackMyLocation() {
         injam.watchMyLocation()
 //        injam.subscribeToMyLocation(channelName)
