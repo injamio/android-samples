@@ -43,10 +43,10 @@ class GoogleMapFragment: Fragment(), OnMapReadyCallback {
 
     override fun onMapReady(p0: GoogleMap?) {
         mMap = p0
-        if (ContextCompat.checkSelfPermission(context!!,
-                        Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            return
-        }
+                if (ContextCompat.checkSelfPermission(context!!,
+                                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    return
+                }
         initGetLocation()
     }
 
@@ -68,15 +68,35 @@ class GoogleMapFragment: Fragment(), OnMapReadyCallback {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val credentials = Credentials(context!!, id!!,
+        getMap()
+
+        val credentials = Credentials(context, id,
                 Constants.injam, mutableListOf())
 
         val no = InjamNotification("test", "test", "test",
                 R.drawable.ic_launcher_background,
                 "tes", "name", "desc", Color.RED,
                 true, false, longArrayOf())
-        injam = Injam(activity, credentials, no, object : IService {
-            override fun updateMessage(p0: String?, p1: Any?) {
+        injam = Injam(activity, credentials, no,         object : IService {
+            override fun joined(name: String?) {
+
+            }
+
+            override fun failed() {
+                Log.d("injam", "Something went wrong!")
+            }
+
+            override fun connected() {
+                Log.d("injam", "connected to injam")
+                trackMyLocation()
+            }
+
+            override fun updateMessage(name: String?, data: Any?) {
+
+            }
+
+            override fun rawData(name: String?, data: JSONObject?) {
+
             }
 
             override fun tracking(name: String?, locationInfo: JSONObject?) {
@@ -87,24 +107,12 @@ class GoogleMapFragment: Fragment(), OnMapReadyCallback {
                                 location.getJSONObject("location").getDouble("lng"))
                     }
                 }
-            }
 
-            override fun rawData(p0: String?, p1: JSONObject?) {
-            }
-
-            override fun connected() {
-                trackMyLocation()
-            }
-
-            override fun failed() {
-            }
-
-            override fun joined(p0: String?) {
             }
         })
 
         exitSession.setOnClickListener { _ ->
-            injam.disconnect()
+            injam.initSendLocations()
             activity?.finish()
         }
         token.setOnEditorActionListener {
@@ -117,7 +125,6 @@ class GoogleMapFragment: Fragment(), OnMapReadyCallback {
             false
         }
 
-        getMap()
 
 
         mFuseLocation = LocationServices.getFusedLocationProviderClient(context!!)
@@ -167,8 +174,8 @@ class GoogleMapFragment: Fragment(), OnMapReadyCallback {
             return
         }
 
-        mMap!!.isMyLocationEnabled = true
-        mMap!!.uiSettings.isMyLocationButtonEnabled = true
+        mMap?.isMyLocationEnabled = true
+        mMap?.uiSettings?.isMyLocationButtonEnabled = true
 
         if (mFuseLocation == null) {
             return
@@ -177,7 +184,7 @@ class GoogleMapFragment: Fragment(), OnMapReadyCallback {
         locationTask.addOnCompleteListener { task ->
             if (task.isSuccessful && task.result != null) {
                 lastLocation = task.result
-                mMap!!.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                mMap?.moveCamera(CameraUpdateFactory.newLatLngZoom(
                         LatLng(task.result.latitude, task.result.longitude)
                         , 16f))
                 injam.initSendLocations()
@@ -185,7 +192,7 @@ class GoogleMapFragment: Fragment(), OnMapReadyCallback {
             }
         }.addOnFailureListener { exception -> exception.printStackTrace() }
 
-        mMap!!.uiSettings.isZoomControlsEnabled = true
+        mMap?.uiSettings?.isZoomControlsEnabled = true
     }
 
     private fun updateLocationOnUI(name: String, lat: Double, lng: Double) {
